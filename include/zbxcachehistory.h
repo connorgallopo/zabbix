@@ -93,8 +93,10 @@ zbx_wcache_info_t;
 #define ZBX_PP_VALUE_OPT_META		0x0001	/* 'zbx_pp_value_opt_t' has log metadata ('mtime' and 'lastlogsize') */
 #define ZBX_PP_VALUE_OPT_LOG		0x0002	/* 'zbx_pp_value_opt_t' has 'timestamp', 'severity', 'logeventid' and */
 						/* 'source' data */
-#define ZBX_DC_FLAGS_NOT_FOR_HISTORY	(ZBX_DC_FLAG_NOVALUE | ZBX_DC_FLAG_UNDEF | ZBX_DC_FLAG_NOHISTORY)
-#define ZBX_DC_FLAGS_NOT_FOR_TRENDS	(ZBX_DC_FLAG_NOVALUE | ZBX_DC_FLAG_UNDEF | ZBX_DC_FLAG_NOTRENDS)
+#define ZBX_DC_FLAG_STREAM_ONLY         0x0100  /* Value should be streamed but not written to DB */
+
+#define ZBX_DC_FLAGS_NOT_FOR_HISTORY	(ZBX_DC_FLAG_NOVALUE | ZBX_DC_FLAG_UNDEF | ZBX_DC_FLAG_NOHISTORY | ZBX_DC_FLAG_STREAM_ONLY)
+#define ZBX_DC_FLAGS_NOT_FOR_TRENDS	(ZBX_DC_FLAG_NOVALUE | ZBX_DC_FLAG_UNDEF | ZBX_DC_FLAG_NOTRENDS | ZBX_DC_FLAG_STREAM_ONLY)
 #define ZBX_DC_FLAGS_NOT_FOR_MODULES	(ZBX_DC_FLAGS_NOT_FOR_HISTORY | ZBX_DC_FLAG_LLD)
 #define ZBX_DC_FLAGS_NOT_FOR_EXPORT	(ZBX_DC_FLAG_NOVALUE | ZBX_DC_FLAG_UNDEF)
 

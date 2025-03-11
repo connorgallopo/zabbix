@@ -1036,6 +1036,25 @@ static int	pp_execute_snmp_get_to_value(zbx_variant_t *value, const char *params
 
 /******************************************************************************
  *                                                                            *
+ * Purpose: execute 'stream only' step                                        *
+ *                                                                            *
+ * Parameters: value  - [IN/OUT] value to process                             *
+ *             value_opt - [IN/OUT] optional value parameters                 *
+ *                                                                            *
+ * Result value: SUCCEED - the preprocessing step was executed successfully.  *
+ *               FAIL    - otherwise. The error message is stored in value.   *
+ *                                                                            *
+ ******************************************************************************/
+static int	pp_execute_stream_only(zbx_variant_t *value, zbx_pp_value_opt_t *value_opt)
+{
+	if (value_opt != NULL)
+		value_opt->flags |= ZBX_DC_FLAG_STREAM_ONLY;
+	
+	return SUCCEED;
+}
+
+/******************************************************************************
+ *                                                                            *
  * Purpose: execute preprocessing step                                        *
  *                                                                            *
  * Parameters: ctx               - [IN] worker specific execution context     *
@@ -1058,7 +1077,7 @@ static int	pp_execute_snmp_get_to_value(zbx_variant_t *value, const char *params
 int	pp_execute_step(zbx_pp_context_t *ctx, zbx_pp_cache_t *cache, zbx_dc_um_shared_handle_t *um_handle,
 		zbx_uint64_t hostid, unsigned char value_type, zbx_variant_t *value, zbx_timespec_t ts,
 		zbx_pp_step_t *step, const zbx_variant_t *history_value_in, zbx_variant_t *history_value_out,
-		zbx_timespec_t *history_ts, const char *config_source_ip)
+		zbx_timespec_t *history_ts, const char *config_source_ip, zbx_pp_value_opt_t *value_opt)
 {
 	int	ret, user_macros = 0;
 	char	*params = NULL;
@@ -1173,6 +1192,9 @@ int	pp_execute_step(zbx_pp_context_t *ctx, zbx_pp_cache_t *cache, zbx_dc_um_shar
 		case ZBX_PREPROC_SNMP_GET_VALUE:
 			ret = pp_execute_snmp_get_to_value(value, params);
 			goto out;
+		case ZBX_PREPROC_STREAM_ONLY:
+			ret = pp_execute_stream_only(value, value_opt);
+			goto out;
 		default:
 			zbx_variant_clear(value);
 			zbx_variant_set_error(value, zbx_dsprintf(NULL, "unknown preprocessing step"));
@@ -1254,6 +1276,8 @@ void	pp_execute(zbx_pp_context_t *ctx, zbx_pp_item_preproc_t *preproc, zbx_pp_ca
 
 	zbx_variant_set_none(&value_raw);
 
+	zbx_pp_value_opt_t	value_opt = {0};
+
 	for (int i = 0; i < preproc->steps_num; i++)
 	{
 		zbx_variant_t		history_value_out, history_none = {0};
@@ -1276,7 +1300,7 @@ void	pp_execute(zbx_pp_context_t *ctx, zbx_pp_item_preproc_t *preproc, zbx_pp_ca
 		}
 
 		if (SUCCEED != pp_execute_step(ctx, cache, um_handle, preproc->hostid, preproc->value_type, value_out,
-				ts, preproc->steps + i, history_value_in, &history_value_out, &history_ts, config_source_ip))
+				ts, preproc->steps + i, history_value_in, &history_value_out, &history_ts, config_source_ip, &value_opt))
 		{
 			zbx_variant_copy(&value_raw, value_out);
 

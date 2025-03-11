@@ -1529,6 +1529,10 @@ function get_preprocessing_types($type = null, $grouped = true, array $supported
 			'group' => _('Throttling'),
 			'name' => _('Discard unchanged with heartbeat')
 		],
+		ZBX_PREPROC_STREAM_ONLY => [
+			'group' => _('Throttling'),
+			'name' => _('Stream only')
+		],
 		ZBX_PREPROC_PROMETHEUS_PATTERN => [
 			'group' => _('Prometheus'),
 			'name' => _('Prometheus pattern')
@@ -1772,6 +1776,10 @@ function normalizeItemPreprocessingSteps(array $preprocessing): array {
 			case ZBX_PREPROC_SCRIPT:
 			case ZBX_PREPROC_SNMP_GET_VALUE:
 				$step['params'] = $step['params'][0];
+				break;
+                
+			case ZBX_PREPROC_STREAM_ONLY:
+				$step['params'] = '';
 				break;
 
 			case ZBX_PREPROC_SNMP_WALK_VALUE:
